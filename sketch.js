@@ -23,6 +23,9 @@ function setup() {
 // #### UTIL: MOUSE EVENTS ####
 // ############################
 
+var doubleClickMS = 0;
+var isDoubleClick = false;
+var isMouseDrag = false;
 mouseListeners = [];
 var mousePressed = function () {
 	this.isDoubleClick = (floor(millis()-doubleClickMS) <= 500?true:false); //for some reason this.isDoubleClick is passed to the functions without problems
@@ -51,19 +54,15 @@ function printR(obj) {
 // ###########################
 
 var setupDOMmanipulations = function() {
-	var someIDP = select("#someID");
-	someIDP.html("aaa");
-	someIDP.style("color: red");
+	var randomTextP = select("#randomTextP");
+	randomTextP.html("aaa");
+	randomTextP.style("color: red");
 
-	var someClassP = selectAll(".someClass");
-	someClassP.forEach(function (elt) {
+	var randomTextC = selectAll(".randomTextC");
+	randomTextC.forEach(function (elt) {
 		elt.style("color: red");
 		elt.mouseOver(mouseOverEvent);
-		console.log(printR(elt));
 	});
-
-	console.log(printR(someClassP));
-	console.log(someClassP);
 
 	createA("https://www.quora.com/What-is-the-difference-between-JSON-and-JSONP","JSON vs JSONP");
 }
@@ -105,8 +104,27 @@ var preloadSpacePeople = function(){
 }
 var setupSpacePeople = function(){
 	if (spacepeople) {
-		spacePeopleP = createP("spacepeople");
-		spacePeopleP.html(printR(spacepeople));
+		spacePeopleP = createP("spacepeople").id("spacePeopleP");
+		spacePeopleTable(spacepeople,"spacePeopleP");
 		print(printR(spacepeople));
 	}
+}
+var spacePeopleTable = function(spacepeople,anchor) {
+	var table = createElement("table").id("spacePeopleT").style("border: 1px solid black;");
+
+	table.child(
+		createElement("tr").child(
+			createElement("th","craft")).child(
+			createElement("th","name"))
+		)
+	for (var i = 1; i < spacepeople.people.length; i++) {
+	table.child(
+		createElement("tr").child(
+			createElement("td",spacepeople.people[i].craft)).child(
+			createElement("td",spacepeople.people[i].name))
+		)	
+	}
+	select("#"+anchor).html("").child(table); //clears the html of the spacePeopleP then adds table as child node
+	
+	
 }
