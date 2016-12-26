@@ -1,6 +1,6 @@
-familyData = [];
+bubbles = [];
 mouseListeners = [];
-// maxMagnitude = 0;
+mode = "Bubble";
 
 function preload() {
 	birdsAmerica = loadJSON("birds_north_america.json");
@@ -8,33 +8,30 @@ function preload() {
 
 
 function setup() {
-	createCanvas(750,750);
+	createCanvas(750,600);
 	
 	var maxMagnitude = 0;
 	var minMagnitude = 0;
 	for (var i = 1; i < birdsAmerica.birds.length; i++) {
 		if (i == 1) minMagnitude = birdsAmerica.birds[i].members.length
 		thisMagnitude = birdsAmerica.birds[i].members.length;
-		familyData.push(new Bubble({ mag: thisMagnitude, family: birdsAmerica.birds[i].family, members: birdsAmerica.birds[i].members }));
+		bubbles.push(new Bubble({ mag: thisMagnitude, family: birdsAmerica.birds[i].family, members: birdsAmerica.birds[i].members }));
 		if (thisMagnitude > maxMagnitude) maxMagnitude = thisMagnitude;
 		if (thisMagnitude < minMagnitude) minMagnitude = thisMagnitude;
 	}
-	// console.log(familyData);
-	
-	for (var i = 0; i < familyData.length; i++) {
-		var radius = map(familyData[i].mag,minMagnitude,maxMagnitude,0,25);
-		familyData[i].r = radius;
-		familyData[i].col = map(familyData[i].mag,minMagnitude,maxMagnitude,100,255);
+	// console.log(bubbles);
+
+	//defines position vector without overlapping the ones that have been created yet
+	for (var i = 0; i < bubbles.length; i++) {
+		bubbles[i].r = map(bubbles[i].mag,minMagnitude,maxMagnitude,0,25);
+		bubbles[i].col = map(bubbles[i].mag,minMagnitude,maxMagnitude,100,255);
+		
 		var overlaps = true;
-		
-		while (overlaps) {
-		
-			familyData[i].x = random(familyData[i].r,width-familyData[i].r);
-			familyData[i].y = random(familyData[i].r,height-familyData[i].r);
+		while (overlaps) { //setting X and Y positions
 			overlaps = false;
-			
+			bubbles[i].pos = createVector(random(bubbles[i].r,width-bubbles[i].r),random(bubbles[i].r,height-bubbles[i].r));
 			for (var j = 0; j < i; j++) {
-				if (familyData[i].isColliding(familyData[j])) overlaps = true;
+				if (bubbles[i].isColliding(bubbles[j])) overlaps = true;
 			}
 		}
 	}
@@ -44,48 +41,34 @@ function draw () {
 	background (0);
 	noStroke();
 	
-	for (var i = 1; i < familyData.length; i++) {
-		familyData[i].update();
-		familyData[i].draw();
+	for (var i = 0; i < bubbles.length; i++) {
+		bubbles[i].update();
+		bubbles[i].draw();
 	}
 
 }
 
 mouseListeners.push({ type:"mousePressed", fn:function () {
-		console.log(mouseX);
-	}});
+	console.log(mouseX);
+}});
 
 
-function Bubble (obj) {
-	this.r = obj.r||10;
-	this.x = obj.x||10;
-	this.y = obj.y||10;
-	this.mag = obj.mag||1;
-	this.col = obj.col||120;
-	this.family = obj.family||"";
-	this.members = obj.members||[];
-	// this.speed = obj.speed||p5.Vector.random2D();
-	
-	this.intersect = function () {
-		return (dist(this.x, this.y, mouseX, mouseY) < this.r);
-	}
-	
-	this.isColliding = function (obj) {
-		return (dist(this.x, this.y, obj.x, obj.y) < this.r + obj.r);
-	}
-	this.update = function () {
-	}
-	
-	this.draw = function () {
-		fill(this.col);
-		ellipse(this.x,this.y,this.r*2,this.r*2);
-		if (this.intersect()) {
-			fill(255);
-			rect(mouseX,mouseY,150,30);
-			fill(0);
-			text(this.family,mouseX,mouseY,150,30);
+function keyPressed() {
+	if (keyCode == 32) { //spacebar
+		if (mode == "Asteroid") mode = "Bubble";
+		else mode = "Asteroid";
+		console.log(mode);
+		if (mode == "Asteroid") {
+			for (var i = 0; i < bubbles.length; i++) {
+				if (bubbles[i].r > 5) bubbles[i].resetAsteroid();
+			}
+		} 
+		else {
+			for (var i = 0; i < bubbles.length; i++) {
+				bubbles[i].resetBubble(); // -> POS is being set to UNDEFINED for some reason
+			}
 		}
-	}
+	} 
 }
 
 
