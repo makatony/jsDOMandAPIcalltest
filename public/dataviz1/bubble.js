@@ -1,5 +1,5 @@
 invincibilityThreshold = 100; //miliseconds of time to ignore further collisions when a collision is detected
-maxVelocity = 5; //because bounciness of asteroids is based on their mass,eventuallly one gets very fast asteroids (assuming no friction)
+maxVelocity = 2; //because bounciness of asteroids is based on their mass,eventuallly one gets very fast asteroids (assuming no friction)
 
 function Bubble (obj) {
 	this.r = obj.r||10;
@@ -100,7 +100,7 @@ function Bubble (obj) {
 		//formulas do not consider the tangent of the circle. only the angle of the vectors of the two objects		
 		thisMass = this.r;
 		bubbleMass = bubble.r;
-		if (bubbleMass > thisMass) bubbleMass *= .5; else thisMass *= .5;
+		// if (bubbleMass > thisMass) bubbleMass *= .5; else thisMass *= .5;
 		var thisNewVelX = (this.velocity.x * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.x)) / (thisMass + bubbleMass);
 		var thisNewVelY = (this.velocity.y * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.y)) / (thisMass + bubbleMass);
 		var bubbleNewVelX = (bubble.velocity.x * (bubbleMass - thisMass) + (2 * thisMass * this.velocity.x)) / (thisMass + bubbleMass);
