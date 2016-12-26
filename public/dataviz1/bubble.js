@@ -1,3 +1,6 @@
+invincibilityThreshold = 100; //miliseconds of time to ignore further collisions when a collision is detected
+maxVelocity = 5; //because bounciness of asteroids is based on their mass,eventuallly one gets very fast asteroids (assuming no friction)
+
 function Bubble (obj) {
 	this.r = obj.r||10;
 	this.pos = obj.pos||createVector(10,10);
@@ -10,7 +13,7 @@ function Bubble (obj) {
 
 	this.isAsteroid = false;
 	this.velocity = createVector(0,0);
-	// this.invincible = 0;
+	this.invincible = 0;
 	
 	this.setInitPosition = function (pos) {
 		this.pos = pos;
@@ -24,7 +27,7 @@ function Bubble (obj) {
 	}
 	
 	this.isColliding = function (obj) {
-		// if (millis() - this.invincible < 0) return false;
+		if (millis() - this.invincible < invincibilityThreshold) return false;
 		return (dist(this.pos.x, this.pos.y, obj.pos.x, obj.pos.y) < this.r + obj.r);
 	}
 	this.update = function () {
@@ -81,11 +84,11 @@ function Bubble (obj) {
 	}
 	
 	this.explode = function (bubble) {
-		// this.invincible = millis();
+		this.invincible = millis();
 	}
 	
 	this.bounces = function (bubble) {
-		// bubble.invincible = millis(); this.invincible = millis();
+		bubble.invincible = millis(); this.invincible = millis();
 		
 		//formulas: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
 		var collisionPointX = ((this.pos.x * bubble.r) + (bubble.pos.x * this.r)) / (this.r + bubble.r);
@@ -95,17 +98,18 @@ function Bubble (obj) {
 
 		//formulas: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
 		//formulas do not consider the tangent of the circle. only the angle of the vectors of the two objects		
-		var thisMass = this.r;
-		var bubbleMass = bubble.r;
+		thisMass = this.r;
+		bubbleMass = bubble.r;
+		if (bubbleMass > thisMass) bubbleMass *= .5; else thisMass *= .5;
 		var thisNewVelX = (this.velocity.x * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.x)) / (thisMass + bubbleMass);
 		var thisNewVelY = (this.velocity.y * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.y)) / (thisMass + bubbleMass);
 		var bubbleNewVelX = (bubble.velocity.x * (bubbleMass - thisMass) + (2 * thisMass * this.velocity.x)) / (thisMass + bubbleMass);
 		var bubbleNewVelY = (bubble.velocity.y * (bubbleMass - thisMass) + (2 * thisMass * this.velocity.y)) / (thisMass + bubbleMass);
 		
-		this.velocity.x = thisNewVelX;
-		this.velocity.y = thisNewVelY;
-		bubble.velocity.x = bubbleNewVelX;
-		bubble.velocity.y = bubbleNewVelY;
+		this.velocity.x = constrain(thisNewVelX,-1 * maxVelocity,maxVelocity);
+		this.velocity.y = constrain(thisNewVelY,-1 * maxVelocity,maxVelocity);
+		bubble.velocity.x = constrain(bubbleNewVelX,-1 * maxVelocity,maxVelocity);
+		bubble.velocity.y = constrain(bubbleNewVelY,-1 * maxVelocity,maxVelocity);
 	}
 	
 	this.windowBorder = function () {
