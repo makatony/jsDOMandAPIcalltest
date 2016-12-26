@@ -3,21 +3,34 @@ function Bubble (obj) {
 	this.pos = obj.pos||createVector(10,10);
 	this.mag = obj.mag||1;
 	this.col = obj.col||120;
+	this.strokeCol = 255;
 	this.family = obj.family||"";
 	this.members = obj.members||[];
 	
+
 	this.isAsteroid = false;
 	this.velocity = createVector(0,0);
+	// this.invincible = 0;
+	
+	this.setInitPosition = function (pos) {
+		this.pos = pos;
+		this.initPos = pos.copy();
+	}
+	
+	
 	
 	this.intersectsMouse = function () {
 		return (dist(this.pos.x, this.pos.y, mouseX, mouseY) < this.r);
 	}
 	
 	this.isColliding = function (obj) {
+		// if (millis() - this.invincible < 0) return false;
 		return (dist(this.pos.x, this.pos.y, obj.pos.x, obj.pos.y) < this.r + obj.r);
 	}
 	this.update = function () {
 		this.pos.add(this.velocity); //adds the velocity to current position.
+		
+		this.windowBorder();
 	}
 	
 	this.draw = function (){
@@ -34,14 +47,19 @@ function Bubble (obj) {
 		}
 	}
 	
+	this.resetBubble = function (){
+		this.pos = this.initPos.copy(); //needs to add copy or else INITPOS will be changed every time that POS changes
+		this.velocity = createVector(0,0);
+		this.isAsteroid = false;
+	}
 	
 	this.drawAsteroid = function () {
 		push();
-		stroke(255);
+		stroke(this.strokeCol);
 		noFill();
 		translate(this.pos.x, this.pos.y);
 		beginShape();
-		for (var i = 0; i < this.pointCount; i++) {
+		for (var i = 0; i < this.pointCount; i++) { //formulas: shiffman
 			var angle = map(i, 0, this.pointCount, 0, TWO_PI);
 			var r = this.r + this.edges[i];
 			var x = r * cos(angle);
@@ -53,22 +71,54 @@ function Bubble (obj) {
 	}
 	
 	this.resetAsteroid = function (){
-		// this.originalPos = this.pos;
 		this.velocity = p5.Vector.random2D();
-		this.pointCount = random(5,15);
+		this.pointCount = max(5,floor(this.r/2));
 		this.edges = [];
 		for (var i=0; i<this.pointCount;i++) {
-			this.edges.push(random(-this.r/2,this.r/2));
+			this.edges.push(random(-this.r/3,this.r/3));
 		}
-		
 		this.isAsteroid = true;
 	}
 	
-	this.resetBubble = function (){
-		this.pos = this.originalPos;
-		this.velocity = createVector(0,0);
-		this.isAsteroid = false;
+	this.explode = function (bubble) {
+		// this.invincible = millis();
 	}
 	
+	this.bounces = function (bubble) {
+		// bubble.invincible = millis(); this.invincible = millis();
+		
+		//formulas: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
+		var collisionPointX = ((this.pos.x * bubble.r) + (bubble.pos.x * this.r)) / (this.r + bubble.r);
+		var collisionPointY = ((this.pos.y * bubble.r) + (bubble.pos.y * this.r)) / (this.r + bubble.r);		
+		fill(255,0,0);
+		ellipse(collisionPointX,collisionPointY,10,10);
+
+		//formulas: https://gamedevelopment.tutsplus.com/tutorials/when-worlds-collide-simulating-circle-circle-collisions--gamedev-769
+		//formulas do not consider the tangent of the circle. only the angle of the vectors of the two objects		
+		var thisMass = this.r;
+		var bubbleMass = bubble.r;
+		var thisNewVelX = (this.velocity.x * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.x)) / (thisMass + bubbleMass);
+		var thisNewVelY = (this.velocity.y * (thisMass - bubbleMass) + (2 * bubbleMass * bubble.velocity.y)) / (thisMass + bubbleMass);
+		var bubbleNewVelX = (bubble.velocity.x * (bubbleMass - thisMass) + (2 * thisMass * this.velocity.x)) / (thisMass + bubbleMass);
+		var bubbleNewVelY = (bubble.velocity.y * (bubbleMass - thisMass) + (2 * thisMass * this.velocity.y)) / (thisMass + bubbleMass);
+		
+		this.velocity.x = thisNewVelX;
+		this.velocity.y = thisNewVelY;
+		bubble.velocity.x = bubbleNewVelX;
+		bubble.velocity.y = bubbleNewVelY;
+	}
+	
+	this.windowBorder = function () {
+		if (this.pos.x > width + this.r) {
+			this.pos.x = -this.r;
+		} else if (this.pos.x < -this.r) {
+			this.pos.x = width + this.r;
+		}
+		if (this.pos.y > height + this.r) {
+			this.pos.y = -this.r;
+		} else if (this.pos.y < -this.r) {
+			this.pos.y = height + this.r;
+		}
+	}
 	
 }

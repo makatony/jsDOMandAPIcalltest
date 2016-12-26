@@ -12,8 +12,8 @@ function setup() {
 	
 	var maxMagnitude = 0;
 	var minMagnitude = 0;
-	for (var i = 1; i < birdsAmerica.birds.length; i++) {
-		if (i == 1) minMagnitude = birdsAmerica.birds[i].members.length
+	for (var i = 0; i < birdsAmerica.birds.length; i++) {
+		if (i == 0) minMagnitude = birdsAmerica.birds[i].members.length
 		thisMagnitude = birdsAmerica.birds[i].members.length;
 		bubbles.push(new Bubble({ mag: thisMagnitude, family: birdsAmerica.birds[i].family, members: birdsAmerica.birds[i].members }));
 		if (thisMagnitude > maxMagnitude) maxMagnitude = thisMagnitude;
@@ -29,7 +29,7 @@ function setup() {
 		var overlaps = true;
 		while (overlaps) { //setting X and Y positions
 			overlaps = false;
-			bubbles[i].pos = createVector(random(bubbles[i].r,width-bubbles[i].r),random(bubbles[i].r,height-bubbles[i].r));
+			bubbles[i].setInitPosition(createVector(random(bubbles[i].r,width-bubbles[i].r),random(bubbles[i].r,height-bubbles[i].r)));
 			for (var j = 0; j < i; j++) {
 				if (bubbles[i].isColliding(bubbles[j])) overlaps = true;
 			}
@@ -44,6 +44,17 @@ function draw () {
 	for (var i = 0; i < bubbles.length; i++) {
 		bubbles[i].update();
 		bubbles[i].draw();
+		
+		//check collisions
+		if (mode != "Asteroid") continue;
+		for (var j = i+1; j < bubbles.length; j++) {
+			if (bubbles[i].isAsteroid && bubbles[j].isAsteroid) { //comparing two asteroids
+				if (bubbles[i].isColliding(bubbles[j])) {
+					bubbles[i].bounces(bubbles[j]);
+					// bubbles[j].explode(bubbles[i]);
+				}
+			}
+		}
 	}
 
 }
@@ -57,7 +68,7 @@ function keyPressed() {
 	if (keyCode == 32) { //spacebar
 		if (mode == "Asteroid") mode = "Bubble";
 		else mode = "Asteroid";
-		console.log(mode);
+		
 		if (mode == "Asteroid") {
 			for (var i = 0; i < bubbles.length; i++) {
 				if (bubbles[i].r > 5) bubbles[i].resetAsteroid();
