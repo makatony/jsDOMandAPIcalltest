@@ -71,14 +71,18 @@ function Bubble (obj) {
 		}
 		endShape(CLOSE);
 		pop();
+		
+		// noFill(); stroke(0,255,0); ellipse(this.pos.x,this.pos.y,this.r*2,this.r*2);
 	}
 	
 	this.resetAsteroid = function (){
 		this.velocity = p5.Vector.random2D();
-		this.pointCount = max(5,floor(this.r/2));
+		this.pointCount = max(10,floor(this.r)); //minimum 10 vertices
 		this.edges = [];
 		for (var i=0; i<this.pointCount;i++) {
-			this.edges.push(random(-this.r/3,this.r/3));
+			xoff = sqrt(this.r)*(i+1)/this.pointCount;	// xoff based on I so that each vertex gets a different noise. based on R so that only asteroid of similar size look similar
+			this.edges.push(this.r*noise(xoff)-this.r/2);   // using perlin noise but scaling it correctly
+			// console.log(xoff)
 		}
 		this.isAsteroid = true;
 	}
