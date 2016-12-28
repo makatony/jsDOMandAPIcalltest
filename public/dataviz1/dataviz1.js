@@ -13,8 +13,17 @@ function setup() {
 	var maxMagnitude = 0;
 	var minMagnitude = 0;
 	for (var i = 0; i < birdsAmerica.birds.length; i++) {
-		if (i == 0) minMagnitude = birdsAmerica.birds[i].members.length
-		thisMagnitude = birdsAmerica.birds[i].members.length;
+		var thisBirdsArray = birdsAmerica.birds[i];
+		if (i == 0) minMagnitude = thisBirdsArray.members.length
+		var thisMagnitude = thisBirdsArray.members.length;
+		
+		var reCount = 0;
+		var re = /^[\w|\-|'|’]+\s/; //https://regex101.com
+		thisBirdsArray.members.forEach(function (elt) { if (!re.exec(elt)) reCount++; });
+		// if (reCount > 0) console.log (thisBirdsArray.family + " = " + thisMagnitude + " - "+reCount + " = " + max(1,thisMagnitude - reCount));
+		// Regex matches members in a family that are only one word. for each member in the family that is only one word, remove one point in magnitude
+		thisMagnitude = max(1,thisMagnitude - reCount);
+		
 		bubbles.push(new Bubble({ mag: thisMagnitude, family: birdsAmerica.birds[i].family, members: birdsAmerica.birds[i].members }));
 		if (thisMagnitude > maxMagnitude) maxMagnitude = thisMagnitude;
 		if (thisMagnitude < minMagnitude) minMagnitude = thisMagnitude;
