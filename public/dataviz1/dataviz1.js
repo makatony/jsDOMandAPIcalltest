@@ -70,6 +70,10 @@ function draw () {
 
 mouseListeners.push({ type:"mousePressed", fn:function () {
 	console.log(mouseX);
+	var bubblesLength = bubbles.length; // required because in the loop we are adding/removing objects of the array
+		for (var i = bubblesLength-1; i >= 0 ; i--) {
+			if (bubbles[i].intersectsMouse() && bubbles[i].isAsteroid) bubbles[i].explode(i);
+		}	
 }});
 
 

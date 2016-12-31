@@ -1,11 +1,11 @@
-invincibilityThreshold = 100; //miliseconds of time to ignore further collisions when a collision is detected
+invincibilityThreshold = 300; //miliseconds of time to ignore further collisions when a collision is detected
 maxVelocity = 2; //because bounciness of asteroids is based on their mass,eventuallly one gets very fast asteroids (assuming no friction)
 
 function Bubble (obj) {
-	this.r = obj.r||10;
-	this.pos = obj.pos||createVector(10,10);
-	this.mag = obj.mag||1;
-	this.col = obj.col||120;
+	this.r 		= obj.r||10;
+	this.pos 	= obj.pos||createVector(10,10);
+	this.mag 	= obj.mag||1;
+	this.col 	= obj.col||120;
 	this.strokeCol = 255;
 	this.family = obj.family||"";
 	this.members = obj.members||[];
@@ -28,11 +28,11 @@ function Bubble (obj) {
 	
 	this.isColliding = function (obj) {
 		if (millis() - this.invincible < invincibilityThreshold) return false;
-		return (dist(this.pos.x, this.pos.y, obj.pos.x, obj.pos.y) < this.r + obj.r);
+		var collisionDetected = (dist(this.pos.x, this.pos.y, obj.pos.x, obj.pos.y) < this.r + obj.r);
+		return collisionDetected;
 	}
 	this.update = function () {
 		this.pos.add(this.velocity); //adds the velocity to current position.
-		
 		this.windowBorder();
 	}
 	
@@ -58,9 +58,9 @@ function Bubble (obj) {
 	
 	this.drawAsteroid = function () {
 		push();
+		translate(this.pos.x, this.pos.y);
 		stroke(this.strokeCol);
 		noFill();
-		translate(this.pos.x, this.pos.y);
 		beginShape();
 		for (var i = 0; i < this.pointCount; i++) { //formulas: shiffman
 			var angle = map(i, 0, this.pointCount, 0, TWO_PI);
@@ -87,8 +87,33 @@ function Bubble (obj) {
 		this.isAsteroid = true;
 	}
 	
-	this.explode = function (bubble) {
+	this.explode = function (placeInArray) {
+		
+		
+		console.log(this.velocity.x*this.velocity.y);
+		if (abs(this.velocity.x*this.velocity.y) <0.2) var childMag = this.velocity.mag()*1.5;
+		else var childMag = this.velocity.mag();
+		
+		//next line requires a .copy() or else the pos of new child will always affect the parent
+		var newBubbleObj = { pos: this.pos.copy(), r: this.r/2, mag: this.mag/2, family: this.family, members: this.members }
+		var child1 = new Bubble(newBubbleObj)
+		child1.resetAsteroid();
+		child1.velocity = this.velocity.copy().rotate(PI/4).setMag(childMag);
+		
+		newBubbleObj.pos = this.pos.copy();
+		var child2 = new Bubble(newBubbleObj)
+		child2.resetAsteroid();
+		child2.velocity = this.velocity.copy().rotate(7/4*PI).setMag(childMag);
 		this.invincible = millis();
+		child1.invincible = millis();
+		child2.invincible = millis();
+		bubbles.splice(placeInArray,1); // removing parent from array
+		bubbles.push(child1);
+		bubbles.push(child2);
+		
+		// console.log(child2.velocity);
+		// console.log(child2.velocity.mag(2));
+
 	}
 	
 	this.bounces = function (bubble) {
