@@ -8,6 +8,8 @@ function preload() {
 
 
 function setup() {
+	console.log(JSON.stringify(birdsAmerica,null,4));
+	
 	createCanvas(750,600);
 	
 	var maxMagnitude = 0;
@@ -69,7 +71,6 @@ function draw () {
 }
 
 mouseListeners.push({ type:"mousePressed", fn:function () {
-	console.log(mouseX);
 	var bubblesLength = bubbles.length; // required because in the loop we are adding/removing objects of the array
 		for (var i = bubblesLength-1; i >= 0 ; i--) {
 			if (bubbles[i].intersectsMouse() && bubbles[i].isAsteroid) bubbles[i].explode(i);

@@ -89,9 +89,7 @@ function Bubble (obj) {
 	
 	this.explode = function (placeInArray) {
 		
-		
-		console.log(this.velocity.x*this.velocity.y);
-		if (abs(this.velocity.x*this.velocity.y) <0.2) var childMag = this.velocity.mag()*1.5;
+		if (abs(this.velocity.x*this.velocity.y) <0.2) var childMag = this.velocity.mag()+2;
 		else var childMag = this.velocity.mag();
 		
 		//next line requires a .copy() or else the pos of new child will always affect the parent
@@ -104,9 +102,9 @@ function Bubble (obj) {
 		var child2 = new Bubble(newBubbleObj)
 		child2.resetAsteroid();
 		child2.velocity = this.velocity.copy().rotate(7/4*PI).setMag(childMag);
-		this.invincible = millis();
-		child1.invincible = millis();
-		child2.invincible = millis();
+
+		child1.invincible = millis()+200;
+		child2.invincible = millis()+200;
 		bubbles.splice(placeInArray,1); // removing parent from array
 		bubbles.push(child1);
 		bubbles.push(child2);
